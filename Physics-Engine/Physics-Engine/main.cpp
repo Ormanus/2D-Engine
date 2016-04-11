@@ -1,66 +1,66 @@
 #include "Renderer.h"
+#define PI 3.14159265
 
-GLFWwindow* window;
-
-int main()
+static void error_callback(int error, const char* description)
 {
+	fputs(description, stderr);
+}
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+}
+int main(void)
+{
+	GLFWwindow* window;
+	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
+		exit(EXIT_FAILURE);
+	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+	if (!window)
 	{
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		return -1;
-	}
-
-	//glfwWindowHint(GLFW_SAMPLES, 4);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	int w = 1024;
-	int h = 768;
-	window = glfwCreateWindow(w, h,
-		"PhysicsEngine", NULL, NULL);
-	if (window == NULL){
-		fprintf(stderr, "Failed to open GLFW window.");
 		glfwTerminate();
-		return -1;
+		exit(EXIT_FAILURE);
 	}
-
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	glfwSetKeyCallback(window, key_callback);
 
-	glfwSetFramebufferSizeCallback(window, phe::framebufferSizeCallback);
-	//glfwSetKeyCallback(window, Renderer::key_callback);
-	phe::framebufferSizeCallback(window, w, h);
-	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
+	phe::Rectangle r1;
+	r1.center = glm::vec2(-0.0f, 0.0f);
+	r1.w = 0.5f;
+	r1.h = 0.1f;
+	r1.rotation = PI / 4.0f;
+	r1.velocity = glm::vec2(0.01f, 0.0f);
 
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	//glfwMakeContextCurrent(window);
+	phe::Rectangle r2;
+	r2.center = glm::vec2(1.0f, 0.0f);
+	r2.w = 0.5f;
+	r2.h = 0.5f;
+	r2.rotation = 0.0f;
 
-	//Game loop
-	do
+
+	while (!glfwWindowShouldClose(window))
 	{
+		float ratio;
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		ratio = width / (float)height;
+		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
-
 		glLoadIdentity();
-		float ratio = w / (float)h;
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		glMatrixMode(GL_MODELVIEW);
-		//glLoadIdentity();
+		glLoadIdentity();
+		
+		//phe::drawRectangle(glm::vec2(-0.5f, -0.1f), glm::vec2(-0.5f, 0.1f), glm::vec2(0.5f, 0.1f));
 
-		phe::drawTriangle(glm::vec2(0.0, 50.5), glm::vec2(-50.5, 0.0), glm::vec2(50.5, 0.0));
+		phe::drawRectangle(&r1);
+
 		glfwSwapBuffers(window);
-
 		glfwPollEvents();
-	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
-
+	}
 	glfwDestroyWindow(window);
 	glfwTerminate();
-	system("pause");
-	return 0;
+	exit(EXIT_SUCCESS);
 }
