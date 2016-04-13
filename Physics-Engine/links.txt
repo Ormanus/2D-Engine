@@ -1,0 +1,5 @@
+N:
+http://www.metanetsoftware.com/technique/tutorialA.html
+
+Code:
+http://www.gamedev.net/page/resources/_/technical/game-programming/2d-rotated-rectangle-collision-r2604
