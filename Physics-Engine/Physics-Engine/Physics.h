@@ -18,7 +18,11 @@ namespace phe
 		float mass;
 	};
 
-	bool isColliding(Rectangle* r1, Rectangle* r2);
+	glm::vec2 isColliding(Rectangle* r1, Rectangle* r2);
+
+	glm::vec2 rotate(const glm::vec2 pos, const float angle);
+
+	void step(Rectangle& r, float dt);
 }
 
 #endif

@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include <Windows.h>
 #define PI 3.14159265
 
 static void error_callback(int error, const char* description)
@@ -16,7 +17,7 @@ int main(void)
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
-	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+	window = glfwCreateWindow(1280, 640, "Simple example", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -26,21 +27,26 @@ int main(void)
 	glfwSetKeyCallback(window, key_callback);
 
 	phe::Rectangle r1;
-	r1.center = glm::vec2(-0.0f, 0.0f);
+	r1.center = glm::vec2(-0.5f, 0.0f);
 	r1.w = 0.5f;
 	r1.h = 0.1f;
-	r1.rotation = PI / 4.0f;
-	r1.velocity = glm::vec2(0.01f, 0.0f);
+	r1.rotation = 0.0f;//-PI / 4.0f;
+	r1.velocity = glm::vec2(5.5f, 0.0f);
+	r1.angularVelocity = 0.9f;
 
 	phe::Rectangle r2;
-	r2.center = glm::vec2(1.0f, 0.0f);
-	r2.w = 0.5f;
-	r2.h = 0.5f;
+	r2.center = glm::vec2(0.5f, 0.0f);
+	r2.w = 0.25f;
+	r2.h = 0.25f;
 	r2.rotation = 0.0f;
+	r2.velocity = glm::vec2(0.0f, 0.0f);
+	r2.angularVelocity = 0.0f;
 
 
 	while (!glfwWindowShouldClose(window))
 	{
+		Sleep(1);
+
 		float ratio;
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
@@ -50,12 +56,25 @@ int main(void)
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
 		
 		//phe::drawRectangle(glm::vec2(-0.5f, -0.1f), glm::vec2(-0.5f, 0.1f), glm::vec2(0.5f, 0.1f));
 
 		phe::drawRectangle(&r1);
+		phe::drawRectangle(&r2);
+
+		phe::step(r1, 0.005);
+		phe::step(r2, 0.005);
+
+		glm::vec2 collision = phe::isColliding(&r1, &r2);
+		if (collision != glm::vec2(0.0))
+		{
+			phe::setColor(0xFF0000FF);
+			r1.center += collision;
+		}
+		else
+		{
+			phe::setColor(0x0000FFFF);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
