@@ -30,8 +30,8 @@ int main(void)
 	r1.center = glm::vec2(-0.5f, 0.0f);
 	r1.w = 0.5f;
 	r1.h = 0.1f;
-	r1.rotation = 0.0f;//-PI / 4.0f;
-	r1.velocity = glm::vec2(5.5f, 0.0f);
+	r1.rotation = 0.0f;
+	r1.velocity = glm::vec2(0.5f, 0.0f);
 	r1.angularVelocity = 0.9f;
 
 	phe::Rectangle r2;
@@ -68,8 +68,22 @@ int main(void)
 		glm::vec2 collision = phe::isColliding(&r1, &r2);
 		if (collision != glm::vec2(0.0))
 		{
+			phe::Rectangle r3;
+			r3.center = collision;
+			r3.h = 0.01;
+			r3.w = 0.01;
+			r3.rotation = 0.0f;
+
+			r2.velocity += r1.velocity / 2.0f;
+			r1.velocity = -r1.velocity / 2.0f;
+
+			r1.angularVelocity /= 2.0f;
+			r2.angularVelocity = -r1.angularVelocity;
+
+			phe::setColor(0xFFFFFFFF);
+			phe::drawRectangle(&r3);
+
 			phe::setColor(0xFF0000FF);
-			r1.center += collision;
 		}
 		else
 		{

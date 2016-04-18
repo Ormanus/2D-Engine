@@ -55,61 +55,87 @@ namespace phe
 		axis[3].x = cos(r2->rotation + halfPI);
 		axis[3].y = sin(r2->rotation + halfPI);
 
-		glm::vec2 collision = glm::vec2(FLT_MAX);
-
-		for (int i = 0; i < 4; i++)
+		for (int k = 0; k < 4; k++) //k = point index
 		{
-			glm::vec2 projectedA[4];
-			glm::vec2 projectedB[4];
+			bool pointFound = true;
+			glm::vec2 point = cornersA[k];
+			for (int i = 2; i < 4; i++) //i = axis index
+			{
+				//project cornersB to
+				//axis 2 and 3
+				//find min and max
+				//project a single cornerA to
+				//the same axis and check if it's between min and max
+				glm::vec2 projectedB[4];
+				for (int j = 0; j < 4; j++) //j = corner index
+				{
+					projectedB[j] = glm::dot(cornersB[j], axis[i]) * axis[i];
+				}
 
-			//A
-			for (int j = 0; j < 4; j++)
-			{
-				projectedA[j] = glm::dot(cornersA[j], axis[i]) * axis[i];
-			}
+				float maxB = glm::dot(axis[i], projectedB[0]);
+				float minB = glm::dot(axis[i], projectedB[0]);
+				for (int j = 1; j < 4; j++)
+				{
+					float dot = glm::dot(axis[i], projectedB[j]);
+					minB = glm::min(minB, dot);
+					maxB = glm::max(maxB, dot);
+				}
 
-			//B
-			for (int j = 0; j < 4; j++)
-			{
-				projectedB[j] = glm::dot(cornersB[j], axis[i]) * axis[i];
-			}
 
-			//min and max
-			float minA = glm::dot(axis[i], projectedA[0]);
-			for (int j = 1; j < 4; j++)
-			{
-				minA = glm::min(minA, glm::dot(axis[i], projectedA[j]));
-			}
+				glm::vec2 projectedPoint = glm::dot(point, axis[i]) * axis[i];
+				float scalar = glm::dot(axis[i], projectedPoint);
 
-			float minB = glm::dot(axis[i], projectedB[0]);
-			for (int j = 1; j < 4; j++)
-			{
-				minB = glm::min(minB, glm::dot(axis[i], projectedB[j]));
+				if (!(scalar < maxB && scalar > minB) && !(scalar > maxB && scalar < minB))
+				{
+					pointFound = false;
+					break;
+				}
 			}
-
-			float maxA = glm::dot(axis[i], projectedA[0]);
-			for (int j = 1; j < 4; j++)
+			if (pointFound)
 			{
-				maxA = glm::max(maxA, glm::dot(axis[i], projectedA[j]));
-			}
-
-			float maxB = glm::dot(axis[i], projectedB[0]);
-			for (int j = 1; j < 4; j++)
-			{
-				maxB = glm::max(maxB, glm::dot(axis[i], projectedB[j]));
-			}
-
-			if (!(maxA >= minB && minA <= maxB))
-			{
-				return glm::vec2(0.0);
-			}
-			else
-			{
-				float overlap = glm::min(abs(maxA - minB), abs(minA - maxB));
-				collision = glm::min(collision, axis[i]*overlap);
+				printf("point found (A)");
+				return point;
 			}
 		}
-		return collision;
+		for (int k = 0; k < 4; k++) //k = point index
+		{
+			bool pointFound = true;
+			glm::vec2 point = cornersB[k];
+			for (int i = 0; i < 2; i++) //i = axis index
+			{
+				glm::vec2 projectedA[4];
+				for (int j = 0; j < 4; j++) //j = corner index
+				{
+					projectedA[j] = glm::dot(cornersA[j], axis[i]) * axis[i];
+				}
+
+				float maxA = glm::dot(axis[i], projectedA[0]);
+				float minA = glm::dot(axis[i], projectedA[0]);
+				for (int j = 1; j < 4; j++)
+				{
+					float dot = glm::dot(axis[i], projectedA[j]);
+					minA = glm::min(minA, dot);
+					maxA = glm::max(maxA, dot);
+				}
+
+
+				glm::vec2 projectedPoint = glm::dot(point, axis[i]) * axis[i];
+				float scalar = glm::dot(axis[i], projectedPoint);
+
+				if (!(scalar < maxA && scalar > minA) && !(scalar > maxA && scalar < minA))
+				{
+					pointFound = false;
+					break;
+				}
+			}
+			if (pointFound)
+			{
+				printf("point found (B)");
+				return point;
+			}
+		}
+
+		return glm::vec2(0);
 	}
 
 	void step(Rectangle& r1, float dt)
