@@ -74,11 +74,7 @@ int main(void)
 			r3.w = 0.01;
 			r3.rotation = 0.0f;
 
-			r2.velocity += r1.velocity / 2.0f;
-			r1.velocity = -r1.velocity / 2.0f;
-
-			r1.angularVelocity /= 2.0f;
-			r2.angularVelocity = -r1.angularVelocity;
+			phe::collide(&r1, &r2);
 
 			phe::setColor(0xFFFFFFFF);
 			phe::drawRectangle(&r3);

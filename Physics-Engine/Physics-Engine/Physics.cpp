@@ -145,4 +145,19 @@ namespace phe
 
 		r1.rotation += r1.angularVelocity * dt;
 	}
+
+	void collide(Rectangle* r1, Rectangle* r2)
+	{
+		float m1 = r1->w * r1->h; //mass 1
+		float m2 = r2->w * r2->h; //mass 2
+
+		glm::vec2 p1 = m1 * r1->velocity;
+		glm::vec2 p2 = m2 * r2->velocity;
+
+		r1->velocity = (r1->velocity * (m1 - m2) + 2.f*m2*r2->velocity) / (m1 + m2);
+		r2->velocity = -(r2->velocity * (m2 - m1) + 2.f*m1*r1->velocity) / (m1 + m2);
+
+		//float M1 = glm::sin()...
+
+	}
 }

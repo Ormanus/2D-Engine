@@ -22,6 +22,8 @@ namespace phe
 
 	glm::vec2 rotate(const glm::vec2 pos, const float angle);
 
+	void collide(Rectangle* r1, Rectangle* r2);
+
 	void step(Rectangle& r, float dt);
 }
 
