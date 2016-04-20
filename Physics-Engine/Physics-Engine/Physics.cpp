@@ -12,9 +12,9 @@ namespace phe
 		return glm::vec2(cos(dir + angle)*dist, sin(dir + angle)*dist);
 	}
 
-	glm::vec2 isColliding(Rectangle* r1, Rectangle* r2)
+	glm::vec4 isColliding(Rectangle* r1, Rectangle* r2)
 	{
-		float halfPI = PI / 2.0f;
+		const float halfPI = PI / 2.0f;
 
 		glm::vec2 cornersA[4];
 		glm::vec2 p1A = r1->center + rotate(glm::vec2(-r1->w / 2.0f, -r1->h / 2.0f), r1->rotation);
@@ -58,7 +58,7 @@ namespace phe
 		for (int k = 0; k < 4; k++) //k = point index
 		{
 			bool pointFound = true;
-			glm::vec2 point = cornersA[k];
+			glm::vec4 point = glm::vec4(cornersA[k], 0.0f, 0.0f);
 			for (int i = 2; i < 4; i++) //i = axis index
 			{
 				//project cornersB to
@@ -82,7 +82,7 @@ namespace phe
 				}
 
 
-				glm::vec2 projectedPoint = glm::dot(point, axis[i]) * axis[i];
+				glm::vec2 projectedPoint = glm::dot(glm::vec2(point.x, point.y), axis[i]) * axis[i];
 				float scalar = glm::dot(axis[i], projectedPoint);
 
 				if (!(scalar < maxB && scalar > minB) && !(scalar > maxB && scalar < minB))
@@ -93,14 +93,26 @@ namespace phe
 			}
 			if (pointFound)
 			{
-				printf("point found (A)");
+				for (int j = 0; j < 4; j++)
+				{
+					glm::vec2 p1 = cornersB[j];
+					glm::vec2 p2 = cornersB[(j + 1) % 4];
+					if (isIntersecting(glm::vec2(point), r1->center, p2, p1))
+					{
+						glm::vec2 n = glm::normalize(glm::vec2(p1.y - p2.y, p2.x - p1.x));
+						point.z = n.x;
+						point.w = n.y;
+						printf("line found (A)\n");
+					}
+				}
+				printf("point found (A)\n");
 				return point;
 			}
 		}
 		for (int k = 0; k < 4; k++) //k = point index
 		{
 			bool pointFound = true;
-			glm::vec2 point = cornersB[k];
+			glm::vec4 point = glm::vec4(cornersB[k], 0.0f, 0.0f);
 			for (int i = 0; i < 2; i++) //i = axis index
 			{
 				glm::vec2 projectedA[4];
@@ -119,7 +131,7 @@ namespace phe
 				}
 
 
-				glm::vec2 projectedPoint = glm::dot(point, axis[i]) * axis[i];
+				glm::vec2 projectedPoint = glm::dot(glm::vec2(point.x, point.y), axis[i]) * axis[i];
 				float scalar = glm::dot(axis[i], projectedPoint);
 
 				if (!(scalar < maxA && scalar > minA) && !(scalar > maxA && scalar < minA))
@@ -130,15 +142,27 @@ namespace phe
 			}
 			if (pointFound)
 			{
-				printf("point found (B)");
+				for (int j = 0; j < 4; j++)
+				{
+					glm::vec2 p1 = cornersA[j];
+					glm::vec2 p2 = cornersA[(j + 1) % 4];
+					if (isIntersecting(glm::vec2(point), r2->center, p1, p2))
+					{
+						glm::vec2 n = glm::normalize(glm::vec2(p1.y - p2.y, p2.x - p1.x));
+						point.z = n.x;
+						point.w = n.y;
+						printf("line found (B)\n");
+					}
+				}
+				printf("point found (B)\n");
 				return point;
 			}
 		}
 
-		return glm::vec2(0);
+		return glm::vec4(0);
 	}
 
-	void step(Rectangle& r1, float dt)
+	void step(Rectangle& r1, const float dt)
 	{
 		r1.center.x += r1.velocity.x * dt;
 		r1.center.y += r1.velocity.y * dt;
@@ -146,18 +170,78 @@ namespace phe
 		r1.rotation += r1.angularVelocity * dt;
 	}
 
-	void collide(Rectangle* r1, Rectangle* r2)
+	void collide(Rectangle* a, Rectangle* b, glm::vec4 collision)
 	{
-		float m1 = r1->w * r1->h; //mass 1
-		float m2 = r2->w * r2->h; //mass 2
+		glm::vec2 p = glm::vec2(collision.x, collision.y);
+		glm::vec2 n = glm::vec2(collision.z, collision.w);
 
-		glm::vec2 p1 = m1 * r1->velocity;
-		glm::vec2 p2 = m2 * r2->velocity;
+		a->mass = a->w * a->h; //mass 1
+		b->mass = b->w * b->h; //mass 2
 
-		r1->velocity = (r1->velocity * (m1 - m2) + 2.f*m2*r2->velocity) / (m1 + m2);
-		r2->velocity = -(r2->velocity * (m2 - m1) + 2.f*m1*r1->velocity) / (m1 + m2);
+		//distances to the centers of mass
+		float r1 = glm::length(a->center - p);
+		float r2 = glm::length(b->center - p);
 
-		//float M1 = glm::sin()...
+		//velocities at the collision point
+		const float halfPI = PI / 2.0f;
 
+		glm::vec2 normalOfRadiusA = glm::vec2(cos(a->rotation + halfPI), sin(a->rotation + halfPI)) * r1;
+		glm::vec2 normalOfRadiusB = glm::vec2(cos(b->rotation + halfPI), sin(b->rotation + halfPI)) * r2;
+
+		glm::vec2 vp1 = a->velocity + normalOfRadiusA * a->angularVelocity;
+		glm::vec2 vp2 = b->velocity + normalOfRadiusB * b->angularVelocity;
+
+		float normalVelocity = glm::dot((vp1 - vp2), n);
+
+		float e = 1.0f; //superball
+
+		assert(glm::length(n) > 0.01f);
+
+		float momentOfInertiaA = 1.0f / 12.0f*a->mass*(a->w*a->w + a->h*a->h);
+		float momentOfInertiaB = 1.0f / 12.0f*b->mass*(b->w*b->w + b->h*b->h);
+
+		float j = glm::dot(-(1 + e), normalVelocity) / (glm::dot(n, n*(1.0f / a->mass + 1.0f / b->mass))
+			+ pow(glm::dot(normalOfRadiusA, n), 2) / momentOfInertiaA
+			+ pow(glm::dot(normalOfRadiusB, n), 2) / momentOfInertiaB);
+
+		printf("j = %f\n", j);
+
+		a->velocity = a->velocity + j / a->mass * n;
+		b->velocity = b->velocity - j / b->mass * n;
+
+		a->angularVelocity = a->angularVelocity + (glm::dot(normalOfRadiusA, j*n) / momentOfInertiaA);
+		b->angularVelocity = b->angularVelocity - (glm::dot(normalOfRadiusB, j*n) / momentOfInertiaB);
+	}
+
+	bool isIntersecting(const glm::vec2 a, const glm::vec2 b, const glm::vec2 c, const glm::vec2 d)
+	{
+		//TODO: optimoi!
+
+		float p0_x = a.x;
+		float p0_y = a.y;
+
+		float p1_x = b.x;
+		float p1_y = b.y;
+
+		float p2_x = c.x;
+		float p2_y = c.y;
+
+		float p3_x = d.x;
+		float p3_y = d.y;
+
+		float s1_x, s1_y, s2_x, s2_y;
+		s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+		s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+		float s, t;
+		s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+		t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+		if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+		{
+			return true;
+		}
+
+		return false; // No collision
 	}
 }
