@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include <Windows.h>
+#include <time.h>
 #define PI 3.14159265
 
 static void error_callback(int error, const char* description)
@@ -11,6 +12,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
+
+float rFloat(float x)
+{
+	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX / x);
+}
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -26,21 +33,21 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
 
-	phe::Rectangle r1;
-	r1.center = glm::vec2(-0.5f, 0.0f);
-	r1.w = 0.5f;
-	r1.h = 0.1f;
-	r1.rotation = 0.0f;
-	r1.velocity = glm::vec2(0.5f, 0.0f);
-	r1.angularVelocity = 0.9f;
+	const int n_rectangles = 10;
 
-	phe::Rectangle r2;
-	r2.center = glm::vec2(0.5f, 0.0f);
-	r2.w = 0.25f;
-	r2.h = 0.25f;
-	r2.rotation = 0.0f;
-	r2.velocity = glm::vec2(0.0f, 0.0f);
-	r2.angularVelocity = 0.0f;
+	phe::Rectangle r[n_rectangles];
+
+	srand(time(NULL));
+
+	for (int i = 0; i < n_rectangles; i++)
+	{
+		r[i].center = glm::vec2(rFloat(2.0f) - 1.0f, rFloat(2.0f) - 1.0f);
+		r[i].w = rFloat(0.5f) + 0.1f;
+		r[i].h = rFloat(0.5f) + 0.1f;
+		r[i].rotation = rFloat(2.0f * PI);
+		r[i].velocity = glm::vec2(rFloat(2.0f) - 1.0f, rFloat(2.0f) - 1.0f);
+		r[i].angularVelocity = rFloat(8.0f) - 4.0f;
+	}
 
 
 	while (!glfwWindowShouldClose(window))
@@ -59,31 +66,53 @@ int main(void)
 		
 		//phe::drawRectangle(glm::vec2(-0.5f, -0.1f), glm::vec2(-0.5f, 0.1f), glm::vec2(0.5f, 0.1f));
 
-		phe::drawRectangle(&r1);
-		phe::drawRectangle(&r2);
+		glm::vec2 prev[n_rectangles];
+		bool color[n_rectangles];
 
-		phe::step(r1, 0.005);
-		phe::step(r2, 0.005);
-
-		glm::vec2 collision = phe::isColliding(&r1, &r2);
-		if (collision != glm::vec2(0.0))
+		for (int i = 0; i < n_rectangles; i++)
 		{
-			phe::Rectangle r3;
-			r3.center = collision;
-			r3.h = 0.01;
-			r3.w = 0.01;
-			r3.rotation = 0.0f;
+			phe::step(r[i], 0.005);
+			prev[i] = r[i].center;
 
-			phe::collide(&r1, &r2);
+			if (r[i].center.x < -2.f) { r[i].center.x = 2.0f; }
+			if (r[i].center.y < -2.f) { r[i].center.y = 2.0f; }
+			if (r[i].center.x > 2.f) { r[i].center.x = -2.0f; }
+			if (r[i].center.y > 2.f) { r[i].center.y = -2.0f; }
 
-			phe::setColor(0xFFFFFFFF);
-			phe::drawRectangle(&r3);
-
-			phe::setColor(0xFF0000FF);
+			color[i] = false;
 		}
-		else
+
+		for (int i = 0; i < n_rectangles; i++)
 		{
-			phe::setColor(0x0000FFFF);
+			for (int j = 0; j < n_rectangles; j++)
+			{
+				if (i != j)
+				{
+					glm::vec4 collision = isColliding(&r[i], &r[j]);
+
+					if (collision != glm::vec4(0.0))
+					{
+						phe::collide(&r[i], &r[j], collision);
+						//r[i].center = prev[i];
+						//r[j].center = prev[j];
+						color[i] = true;
+						color[j] = true;
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < n_rectangles; i++)
+		{
+			if (color[i])
+			{
+				phe::setColor(0xFF0000FF);
+			}
+			else
+			{
+				phe::setColor(0x0000FFFF);
+			}
+			phe::drawRectangle(&r[i]);
 		}
 
 		glfwSwapBuffers(window);

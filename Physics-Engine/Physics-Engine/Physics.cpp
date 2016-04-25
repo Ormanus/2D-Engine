@@ -1,6 +1,6 @@
 #include "Physics.h"
 
-#define PI 3.14159265
+#define PI 3.14159265f
 
 namespace phe
 {
@@ -172,11 +172,15 @@ namespace phe
 
 	void collide(Rectangle* a, Rectangle* b, glm::vec4 collision)
 	{
+		static int counter = 0;
+		counter++;
+		printf("Collision %u\n", counter);
+
 		glm::vec2 p = glm::vec2(collision.x, collision.y);
 		glm::vec2 n = glm::vec2(collision.z, collision.w);
 
-		a->mass = a->w * a->h; //mass 1
-		b->mass = b->w * b->h; //mass 2
+		a->mass = 1.0f;//a->w * a->h * 1.f; //mass 1
+		b->mass = 1.0f;//b->w * b->h * 1.f; //mass 2
 
 		//distances to the centers of mass
 		float r1 = glm::length(a->center - p);
@@ -185,24 +189,32 @@ namespace phe
 		//velocities at the collision point
 		const float halfPI = PI / 2.0f;
 
-		glm::vec2 normalOfRadiusA = glm::vec2(cos(a->rotation + halfPI), sin(a->rotation + halfPI)) * r1;
-		glm::vec2 normalOfRadiusB = glm::vec2(cos(b->rotation + halfPI), sin(b->rotation + halfPI)) * r2;
+		glm::vec2 normalOfRadiusA = -glm::normalize(glm::vec2(collision.y - a->center.y, a->center.x - collision.x))/* * r1*/;
+		glm::vec2 normalOfRadiusB = -glm::normalize(glm::vec2(collision.y - b->center.y, b->center.x - collision.x))/* * r2*/;
 
 		glm::vec2 vp1 = a->velocity + normalOfRadiusA * a->angularVelocity;
 		glm::vec2 vp2 = b->velocity + normalOfRadiusB * b->angularVelocity;
 
+		glm::vec2 realativeVelocity = vp1 - vp2;
+
 		float normalVelocity = glm::dot((vp1 - vp2), n);
 
-		float e = 1.0f; //superball
+		float e = 1.0f; //coefficient of restitution
 
-		assert(glm::length(n) > 0.01f);
+		//assert(glm::length(n) > 0.01f);
+		printf("n = %f\n", glm::length(n));
 
-		float momentOfInertiaA = 1.0f / 12.0f*a->mass*(a->w*a->w + a->h*a->h);
-		float momentOfInertiaB = 1.0f / 12.0f*b->mass*(b->w*b->w + b->h*b->h);
+		float momentOfInertiaA = (1.0f / 12.0f)*a->mass*(a->w*a->w + a->h*a->h);
+		float momentOfInertiaB = (1.0f / 12.0f)*b->mass*(b->w*b->w + b->h*b->h);
 
-		float j = glm::dot(-(1 + e), normalVelocity) / (glm::dot(n, n*(1.0f / a->mass + 1.0f / b->mass))
+		float j = glm::dot(-(1.0f + e)*realativeVelocity, n) / (glm::dot(n, n*((1.0f / a->mass) + (1.0f / b->mass)))
 			+ pow(glm::dot(normalOfRadiusA, n), 2) / momentOfInertiaA
 			+ pow(glm::dot(normalOfRadiusB, n), 2) / momentOfInertiaB);
+
+		//if (j < 0.00001f)
+		//{
+		//	printf("error!\n");
+		//}
 
 		printf("j = %f\n", j);
 
@@ -210,7 +222,7 @@ namespace phe
 		b->velocity = b->velocity - j / b->mass * n;
 
 		a->angularVelocity = a->angularVelocity + (glm::dot(normalOfRadiusA, j*n) / momentOfInertiaA);
-		b->angularVelocity = b->angularVelocity - (glm::dot(normalOfRadiusB, j*n) / momentOfInertiaB);
+		b->angularVelocity = b->angularVelocity + (glm::dot(normalOfRadiusB, -j*n) / momentOfInertiaB);
 	}
 
 	bool isIntersecting(const glm::vec2 a, const glm::vec2 b, const glm::vec2 c, const glm::vec2 d)
