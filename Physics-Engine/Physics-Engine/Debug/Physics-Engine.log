@@ -1,12 +1,15 @@
-﻿Build started 26.4.2016 13:56:10.
-     1>Project "C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Physics-Engine\Physics-Engine.vcxproj" on node 2 (Build target(s)).
-     1>Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Debug\Physics-Engine.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\\lib" glfw3.lib glew32s.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Debug\Physics-Engine.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Debug\Physics-Engine.lib" /MACHINE:X86 Debug\main.obj
+﻿Build started 26.4.2016 20:28:03.
+     1>Project "C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Physics-Engine\Physics-Engine.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\include\\" /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Physics.cpp
+         Physics.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Debug\Physics-Engine.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\\lib" glfw3.lib glew32s.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Debug\Physics-Engine.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Debug\Physics-Engine.lib" /MACHINE:X86 Debug\main.obj
          Debug\Physics.obj
      1>LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-         Physics-Engine.vcxproj -> C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Debug\Physics-Engine.exe
-     1>Done Building Project "C:\Users\ollisal\Documents\GitHub\2D-Engine\Physics-Engine\Physics-Engine\Physics-Engine.vcxproj" (Build target(s)).
+         Physics-Engine.vcxproj -> C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Debug\Physics-Engine.exe
+     1>Done Building Project "C:\Users\Olli\Documents\GitHub\2D-Physics-Engine\Physics-Engine\Physics-Engine\Physics-Engine.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.57
+Time Elapsed 00:00:00.80

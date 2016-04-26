@@ -148,7 +148,7 @@ namespace phe
 					glm::vec2 p2 = cornersA[(j + 1) % 4];
 					if (isIntersecting(glm::vec2(point), r2->center, p1, p2))
 					{
-						glm::vec2 n = glm::normalize(glm::vec2(p1.y - p2.y, p2.x - p1.x));
+						glm::vec2 n = -glm::normalize(glm::vec2(p1.y - p2.y, p2.x - p1.x));
 						point.z = n.x;
 						point.w = n.y;
 						printf("line found (B)\n");
@@ -179,8 +179,8 @@ namespace phe
 		glm::vec2 p = glm::vec2(collision.x, collision.y);
 		glm::vec2 n = glm::vec2(collision.z, collision.w);
 
-		a->mass = 1.0f;//a->w * a->h * 1.f; //mass 1
-		b->mass = 1.0f;//b->w * b->h * 1.f; //mass 2
+		a->mass = a->w * a->h * 1.f; //mass 1
+		b->mass = b->w * b->h * 1.f; //mass 2
 
 		//distances to the centers of mass
 		float r1 = glm::length(a->center - p);
@@ -201,6 +201,7 @@ namespace phe
 
 		if (normalVelocity > 0)
 		{
+			printf(" -- No Collision\n");
 			return;
 		}
 

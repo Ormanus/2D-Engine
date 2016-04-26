@@ -18,6 +18,16 @@ float rFloat(float x)
 	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX / x);
 }
 
+void drawNormal(glm::vec4 data)
+{
+	phe::Rectangle r;
+	r.w = 0.25;
+	r.h = 0.01;
+	r.rotation = atan2f(data.w, data.z);
+	r.center.x = data.x + data.z;
+	r.center.y = data.y + data.w;
+}
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -46,13 +56,13 @@ int main(void)
 		r[i].h = rFloat(0.5f) + 0.1f;
 		r[i].rotation = rFloat(2.0f * PI);
 		r[i].velocity = glm::vec2(rFloat(2.0f) - 1.0f, rFloat(2.0f) - 1.0f);
-		r[i].angularVelocity = rFloat(8.0f) - 4.0f;
+		r[i].angularVelocity = rFloat(16.0f) - 4.0f;
 	}
 
 
 	while (!glfwWindowShouldClose(window))
 	{
-		Sleep(1);
+		Sleep(10);
 
 		float ratio;
 		int width, height;
@@ -84,7 +94,7 @@ int main(void)
 
 		for (int i = 0; i < n_rectangles; i++)
 		{
-			for (int j = 0; j < n_rectangles; j++)
+			for (int j = i+1; j < n_rectangles; j++)
 			{
 				if (i != j)
 				{
@@ -97,6 +107,9 @@ int main(void)
 						//r[j].center = prev[j];
 						color[i] = true;
 						color[j] = true;
+
+						//draw normal
+						drawNormal(collision);
 					}
 				}
 			}
