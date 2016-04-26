@@ -189,8 +189,8 @@ namespace phe
 		//velocities at the collision point
 		const float halfPI = PI / 2.0f;
 
-		glm::vec2 normalOfRadiusA = -glm::normalize(glm::vec2(collision.y - a->center.y, a->center.x - collision.x))/* * r1*/;
-		glm::vec2 normalOfRadiusB = -glm::normalize(glm::vec2(collision.y - b->center.y, b->center.x - collision.x))/* * r2*/;
+		glm::vec2 normalOfRadiusA = -glm::normalize(glm::vec2(collision.y - a->center.y, a->center.x - collision.x)) * r1;
+		glm::vec2 normalOfRadiusB = -glm::normalize(glm::vec2(collision.y - b->center.y, b->center.x - collision.x)) * r2;
 
 		glm::vec2 vp1 = a->velocity + normalOfRadiusA * a->angularVelocity;
 		glm::vec2 vp2 = b->velocity + normalOfRadiusB * b->angularVelocity;
@@ -198,6 +198,11 @@ namespace phe
 		glm::vec2 realativeVelocity = vp1 - vp2;
 
 		float normalVelocity = glm::dot((vp1 - vp2), n);
+
+		if (normalVelocity > 0)
+		{
+			return;
+		}
 
 		float e = 1.0f; //coefficient of restitution
 
