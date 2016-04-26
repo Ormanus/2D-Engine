@@ -18,23 +18,13 @@ float rFloat(float x)
 	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX / x);
 }
 
-void drawNormal(glm::vec4 data)
-{
-	phe::Rectangle r;
-	r.w = 0.25;
-	r.h = 0.01;
-	r.rotation = atan2f(data.w, data.z);
-	r.center.x = data.x + data.z;
-	r.center.y = data.y + data.w;
-}
-
 int main(void)
 {
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
-	window = glfwCreateWindow(1280, 640, "Simple example", NULL, NULL);
+	window = glfwCreateWindow(800, 800, "Simple example", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -52,13 +42,14 @@ int main(void)
 	for (int i = 0; i < n_rectangles; i++)
 	{
 		r[i].center = glm::vec2(rFloat(2.0f) - 1.0f, rFloat(2.0f) - 1.0f);
-		r[i].w = rFloat(0.5f) + 0.1f;
-		r[i].h = rFloat(0.5f) + 0.1f;
+		r[i].w = rFloat(0.2f) + 0.1f;
+		r[i].h = rFloat(0.2f) + 0.1f;
 		r[i].rotation = rFloat(2.0f * PI);
 		r[i].velocity = glm::vec2(rFloat(2.0f) - 1.0f, rFloat(2.0f) - 1.0f);
 		r[i].angularVelocity = rFloat(16.0f) - 4.0f;
 	}
 
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -68,11 +59,12 @@ int main(void)
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		ratio = width / (float)height;
-		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
+		glViewport(0, 0, width, height);
+
+		glClear(GL_COLOR_BUFFER_BIT);
 		glLoadIdentity();
-		glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+		glOrtho(ratio, ratio, -ratio, ratio, ratio, -ratio);
 		
 		//phe::drawRectangle(glm::vec2(-0.5f, -0.1f), glm::vec2(-0.5f, 0.1f), glm::vec2(0.5f, 0.1f));
 
@@ -84,10 +76,21 @@ int main(void)
 			phe::step(r[i], 0.005);
 			prev[i] = r[i].center;
 
-			if (r[i].center.x < -2.f) { r[i].center.x = 2.0f; }
-			if (r[i].center.y < -2.f) { r[i].center.y = 2.0f; }
-			if (r[i].center.x > 2.f) { r[i].center.x = -2.0f; }
-			if (r[i].center.y > 2.f) { r[i].center.y = -2.0f; }
+			/*if (r[i].center.x < -1.f) { r[i].center.x = 1.0f; }
+			if (r[i].center.y < -1.f) { r[i].center.y = 1.0f; }
+			if (r[i].center.x > 1.f) { r[i].center.x = -1.0f; }
+			if (r[i].center.y > 1.f) { r[i].center.y = -1.0f; }*/
+
+			if (r[i].center.x < -1.f ||
+				r[i].center.y < -1.f ||
+				r[i].center.x > 1.f  ||
+				r[i].center.y > 1.f)
+			{
+				r[i].center = prev[i];
+				r[i].velocity = -r[i].velocity;
+			}
+
+
 
 			color[i] = false;
 		}
@@ -103,13 +106,10 @@ int main(void)
 					if (collision != glm::vec4(0.0))
 					{
 						phe::collide(&r[i], &r[j], collision);
-						//r[i].center = prev[i];
-						//r[j].center = prev[j];
+						r[i].center = prev[i];
+						r[j].center = prev[j];
 						color[i] = true;
 						color[j] = true;
-
-						//draw normal
-						drawNormal(collision);
 					}
 				}
 			}

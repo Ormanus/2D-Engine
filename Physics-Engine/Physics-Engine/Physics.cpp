@@ -1,6 +1,7 @@
 #include "Physics.h"
 
 #define PI 3.14159265f
+#define G -9.81f
 
 namespace phe
 {
@@ -168,6 +169,8 @@ namespace phe
 		r1.center.y += r1.velocity.y * dt;
 
 		r1.rotation += r1.angularVelocity * dt;
+
+		r1.velocity.y += G*dt;
 	}
 
 	void collide(Rectangle* a, Rectangle* b, glm::vec4 collision)
